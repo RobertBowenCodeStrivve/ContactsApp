@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import {DatabaseManager, databaseType, db_options} from '@contacts/database'
 const app = express();
+import contactsRouter from './api/routes/contactsRouter';
+import contactsHistoryRouter from './api/routes/contactsHistoryRouter';
 
 DatabaseManager.addConnection({
     type: db_options.POSTGRES,
@@ -17,6 +19,10 @@ DatabaseManager.addConnection({
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World112!');
+});
+
+app.get('/hello', (req: Request, res: Response) => {
+  res.send('Hello World1333333!');
 });
 
 const port = process.env.PORT || 3000;
