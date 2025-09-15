@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  contacts-api:
+    build:
+      context: ../../
+      dockerfile: server/contacts_api/docker/Dockerfile
+    ports:
+      - "7000:3000"
+    environment: 
+      - DB_HOST=contacts-db
+      - DB_PORT=5433
+      - DB_NAME=${POSTGRES_NAME_CONTACTS}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - environment=localstack
+    depends_on:
+      contacts-db:
+        condition: service_healthy
+    networks:
+      - contacts-network
+
+  contacts-db:
+    image: postgis/postgis:15-3.4
+    restart: unless-stopped
+    ports:
+      - "5433:5433"
+    environment:
+      - POSTGRES_DB=${POSTGRES_NAME_CONTACTS}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - contacts-db-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_NAME_CONTACTS}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - contacts-network
+  schema-codegen:
+    profiles: ["migration_tools"]
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ../../common/database:/app
+    depends_on:
+      - contacts-db
+    command: >
+      sh -c "npm i &&
+              npx kysely-codegen --url postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@contacts-db:5432/${POSTGRES_NAME_CONTACTS} --out-file src/schema.ts"
+    networks:
+      - contacts-network
+  flyway:
+    profiles: ["migration_tools"]
+    image: flyway/flyway:latest
+    command: migrate
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://contacts-db:5432/${POSTGRES_NAME_CONTACTS}
+      - FLYWAY_USER=${POSTGRES_USER}
+      - FLYWAY_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      contacts-db:
+        condition: service_healthy
+    volumes:
+      - ../../database/migrations:/flyway/sql
+    networks:
+      - contacts-network
+volumes:
+  contacts-db-data:
+
+networks:
+  contacts-network:
+    driver: bridge

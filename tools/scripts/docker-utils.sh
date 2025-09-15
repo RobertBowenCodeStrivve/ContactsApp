@@ -1,0 +1,153 @@
+#!/bin/bash
+
+# contacts Docker Management Tool
+# Source this file to load the contacts command
+# Usage: source docker-utils.sh
+
+# COMPOSE_DIR will be set dynamically using CONTACTS_HOME
+
+# Navigate to compose directory and run command
+
+_docker_compose() {
+    _check_contacts_home || return 1
+    (cd "$CONTACTS_HOME/tools/docker-compose" && docker-compose -p contacts "$@")
+}
+
+_check_contacts_home() {
+    if [ -z "${CONTACTS_HOME:-}" ]; then
+        echo "Error: CONTACTS_HOME environment variable is not set or exported"
+        echo "Please export CONTACTS_HOME=/path/to/contacts"
+        return 1
+    fi
+}
+
+_migrate_contacts(){
+    echo "Running database migrations..."
+    _docker_compose up flyway
+    echo "generating schema for kysely using kysely-codegen"
+    _docker_compose up schema-codegen
+}
+
+contacts() {
+    _check_contacts_home || return 1
+    case "$1" in
+        "stack")
+            case "$2" in
+                "up")
+                    if [ -n "$3" ]; then
+                        echo "Starting $3 service..."
+                        _docker_compose up -d "$3"
+                    else
+                        echo "Starting contacts stack..."
+                        _docker_compose up -d
+                    fi
+                    ;;
+                "down")
+                    if [ -n "$3" ]; then
+                        echo "Stopping $3 service..."
+                        _docker_compose stop "$3"
+                    else
+                        echo "Stopping contacts stack..."
+                        _docker_compose down
+                    fi
+                    ;;
+                "restart")
+                    if [ -n "$3" ]; then
+                        echo "Restarting $3 service..."
+                        _docker_compose restart "$3"
+                    else
+                        echo "Restarting contacts stack..."
+                        _docker_compose down && _docker_compose up -d
+                    fi
+                    ;;
+                "status")
+                    echo "contacts stack status:"
+                    _docker_compose ps
+                    ;;
+                *)
+                    echo "Usage: contacts stack [up|down|restart|status] [service]"
+                    echo "Services: contacts-api, contacts-db, flyway"
+                    ;;
+            esac
+            ;;
+        "build")
+            case "$2" in
+                "stack")
+                    if [ "$3" = "--migrate" ]; then
+                        echo "Building contacts db..."
+                        _docker_compose build contacts-db
+                        echo "Migrating and generating schema"
+                        _migrate_contacts
+                        echo "Building remaining services..."
+                        _docker_compose build
+                    elif [ -n "$3" ]; then
+                        echo "Building $3 service..."
+                        _docker_compose build "$3"
+                    else
+                        echo "Building contacts services..."
+                        _docker_compose build
+                    fi
+                    ;;
+                *)
+                    echo "Usage: contacts build stack [service|--migrate]"
+                    ;;
+            esac
+            ;;
+        "logs")
+            if [ -n "$2" ]; then
+                echo "Showing logs for $2..."
+                _docker_compose logs -f "$2"
+            else
+                echo "Showing all logs..."
+                _docker_compose logs -f
+            fi
+            ;;
+        "migrate")
+            _migrate_contacts
+            ;;
+        "aws")
+            case "$2" in
+                "sso")
+                    contacts-login
+                    ;;
+            esac
+        ;;
+        "clean")
+            echo "Cleaning up containers, networks, and volumes..."
+            _docker_compose down -v
+            docker system prune -f
+            ;;
+        "help"|"")
+            echo "contacts Docker Management Tool"
+            echo ""
+            echo "Usage: contacts <command> [args...]"
+            echo ""
+            echo "Commands:"
+            echo "  stack up [service]      - Start stack or specific service"
+            echo "  stack down [service]    - Stop stack or specific service"  
+            echo "  stack restart [service] - Restart stack or specific service"
+            echo "  stack status            - Show container status"
+            echo "  build stack [service]   - Build stack or specific service"
+            echo "  logs [service]          - Show logs (all or specific service)"
+            echo "  migrate                 - Run database migrations"
+            echo "  clean                   - Stop and cleanup everything"
+            echo "  help                    - Show this help"
+            echo ""
+            echo "Services: contacts-api, contacts-db, flyway"
+            echo ""
+            echo "Examples:"
+            echo "  contacts stack up"
+            echo "  contacts stack up contacts-api"
+            echo "  contacts stack down"
+            echo "  contacts build stack"
+            echo "  contacts logs contacts-api"
+            ;;
+        *)
+            echo "Unknown command: $1"
+            echo "Run 'contacts help' for usage information"
+            ;;
+    esac
+}
+
+echo "contacts Docker utilities loaded!"
+echo "Type 'contacts help' for available commands"

@@ -1,12 +1,19 @@
 {
   "name": "contactsapp",
   "version": "1.0.0",
-  "description": "KnotAPI Take Home Assignment Assignment",
+  "description": "KnotAPI Take Home Assignment Assignment monorepo",
   "main": "index.js",
   "scripts": {
+    "build": "npm ci && npm run build --workspaces",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "workspaces": [
+    "common/*",
+    "server/*",
+    "web-apps/*"
+  ],
   "keywords": [],
-  "author": "",
+  "author": "Robert Bowen",
   "license": "ISC"
 }
+
