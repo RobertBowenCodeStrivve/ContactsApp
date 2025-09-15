@@ -8,9 +8,9 @@
 
 # Navigate to compose directory and run command
 
-_docker_compose() {
+_docker_compose_contacts() {
     _check_contacts_home || return 1
-    (cd "$CONTACTS_HOME/tools/docker-compose" && docker-compose -p contacts "$@")
+    (cd "$CONTACTS_HOME/tools/docker-compose" && docker-compose -p contactsapp "$@")
 }
 
 _check_contacts_home() {
@@ -23,9 +23,9 @@ _check_contacts_home() {
 
 _migrate_contacts(){
     echo "Running database migrations..."
-    _docker_compose up flyway
+    _docker_compose_contacts up flyway
     echo "generating schema for kysely using kysely-codegen"
-    _docker_compose up schema-codegen
+    _docker_compose_contacts up schema-codegen
 }
 
 contacts() {
@@ -36,33 +36,33 @@ contacts() {
                 "up")
                     if [ -n "$3" ]; then
                         echo "Starting $3 service..."
-                        _docker_compose up -d "$3"
+                        _docker_compose_contacts up -d "$3"
                     else
                         echo "Starting contacts stack..."
-                        _docker_compose up -d
+                        _docker_compose_contacts up -d
                     fi
                     ;;
                 "down")
                     if [ -n "$3" ]; then
                         echo "Stopping $3 service..."
-                        _docker_compose stop "$3"
+                        _docker_compose_contacts stop "$3"
                     else
                         echo "Stopping contacts stack..."
-                        _docker_compose down
+                        _docker_compose_contacts down
                     fi
                     ;;
                 "restart")
                     if [ -n "$3" ]; then
                         echo "Restarting $3 service..."
-                        _docker_compose restart "$3"
+                        _docker_compose_contacts restart "$3"
                     else
                         echo "Restarting contacts stack..."
-                        _docker_compose down && _docker_compose up -d
+                        _docker_compose_contacts down && _docker_compose_contacts up -d
                     fi
                     ;;
                 "status")
                     echo "contacts stack status:"
-                    _docker_compose ps
+                    _docker_compose_contacts ps
                     ;;
                 *)
                     echo "Usage: contacts stack [up|down|restart|status] [service]"
@@ -73,19 +73,19 @@ contacts() {
         "build")
             case "$2" in
                 "stack")
-                    if [ "$3" = "--migrate" ]; then
+                    if [ "$3" = "--migrate" ] || [ ! -f "$CONTACTS_HOME/common/database/src/schema.ts" ]; then
                         echo "Building contacts db..."
-                        _docker_compose build contacts-db
+                        _docker_compose_contacts build contacts-db
                         echo "Migrating and generating schema"
                         _migrate_contacts
                         echo "Building remaining services..."
-                        _docker_compose build
+                        _docker_compose_contacts build
                     elif [ -n "$3" ]; then
                         echo "Building $3 service..."
-                        _docker_compose build "$3"
+                        _docker_compose_contacts build "$3"
                     else
                         echo "Building contacts services..."
-                        _docker_compose build
+                        _docker_compose_contacts build
                     fi
                     ;;
                 *)
@@ -96,25 +96,18 @@ contacts() {
         "logs")
             if [ -n "$2" ]; then
                 echo "Showing logs for $2..."
-                _docker_compose logs -f "$2"
+                _docker_compose_contacts logs -f "$2"
             else
                 echo "Showing all logs..."
-                _docker_compose logs -f
+                _docker_compose_contacts logs -f
             fi
             ;;
         "migrate")
             _migrate_contacts
             ;;
-        "aws")
-            case "$2" in
-                "sso")
-                    contacts-login
-                    ;;
-            esac
-        ;;
         "clean")
             echo "Cleaning up containers, networks, and volumes..."
-            _docker_compose down -v
+            _docker_compose_contacts down -v
             docker system prune -f
             ;;
         "help"|"")

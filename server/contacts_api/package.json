@@ -1,12 +1,25 @@
 {
-  "name": "contacts_api",
+  "name": "@contacts/api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start_dockerless": "nodemon src/app.ts",
+    "build": "npx tsc",
+    "build_docker": "docker build -f docker/Dockerfile -t my-app:latest .",
+    "start": "docker rm contacts_api && docker run -p 7000:3000 --name contacts_api my-app:latest",
+    "stop": "docker kill contacts_api"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@contacts/database": "*",
+    "express": "^5.1.0",
+    "joi": "^17.13.3",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "nodemon": "^3.1.10"
+  }
 }
