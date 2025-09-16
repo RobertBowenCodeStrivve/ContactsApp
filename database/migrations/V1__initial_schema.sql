@@ -15,7 +15,6 @@ CREATE TABLE contacts (
 CREATE TABLE contact_history (
     id SERIAL PRIMARY KEY,
     contact_id INTEGER NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
-    changed_by INTEGER NOT NULL REFERENCES users(id),
     change_type VARCHAR(50) NOT NULL, -- 'CREATE', 'UPDATE', 'DELETE'
     field_name VARCHAR(255), -- NULL for CREATE/DELETE, field name for UPDATE
     old_value TEXT, -- NULL for CREATE, old value for UPDATE/DELETE
@@ -26,4 +25,3 @@ CREATE TABLE contact_history (
 -- Create indexes for better performance
 CREATE INDEX idx_contacts_email ON contacts(email);
 CREATE INDEX idx_contact_history_contact_id ON contact_history(contact_id);
-CREATE INDEX idx_contact_history_changed_by ON contact_history(changed_by);
