@@ -11,6 +11,7 @@
     "moduleResolution": "node",         // Use Node.js module resolution
     "allowJs": true,                    // Allow JavaScript files in the project
     "strictNullChecks": true,            // Enable strict null checks
+    "declaration": true,                 // Generate .d.ts declaration files
   },
   "include": ["src/**/*"],              // Include all TypeScript files in the `src` folder
   "exclude": ["node_modules", "dist"]   // Exclude `node_modules` and compiled output folder

@@ -11,6 +11,16 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface Contact {
+  created_at: Generated<Timestamp | null>;
+  email: string;
+  first_name: string;
+  id: Generated<number>;
+  last_name: string;
+  phone_number: string;
+  updated_at: Generated<Timestamp | null>;
+}
+
 export interface ContactHistory {
   change_type: string;
   changed_at: Generated<Timestamp | null>;
@@ -19,16 +29,6 @@ export interface ContactHistory {
   id: Generated<number>;
   new_value: string | null;
   old_value: string | null;
-}
-
-export interface Contacts {
-  created_at: Generated<Timestamp | null>;
-  email: string;
-  first_name: string;
-  id: Generated<number>;
-  last_name: string;
-  phone_number: string;
-  updated_at: Generated<Timestamp | null>;
 }
 
 export interface FlywaySchemaHistory {
@@ -45,7 +45,7 @@ export interface FlywaySchemaHistory {
 }
 
 export interface DB {
+  contact: Contact;
   contact_history: ContactHistory;
-  contacts: Contacts;
   flyway_schema_history: FlywaySchemaHistory;
 }
