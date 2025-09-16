@@ -39,6 +39,7 @@ export default class ContactsController {
     const contactData = req.body;
     try{
         const contact = await this.contactsService.createContact(contactData);
+        // Log the creation in contact history
         res.status(200).json({
           message: "Contact created successfully",
           data: contact
@@ -54,6 +55,7 @@ export default class ContactsController {
       const contactData = req.body;
       try{
           const updatedContact = await this.contactsService.updateContact(id, contactData);
+          // Log the update in contact history
           res.status(200).json({
           message: "Contact updated successfully",
           data: updatedContact
@@ -62,12 +64,13 @@ export default class ContactsController {
     catch(error){
         this.handleUnexpectedError(res, error);
     }
-  }
+}
 
 async deleteContact(req: Request, res: Response) {
     const { id } = req.params;
       try{
           await this.contactsService.deleteContact(id);
+          // Log the deletion in contact history
           res.status(200).json({
           message: "Contact deleted successfully",
         });
