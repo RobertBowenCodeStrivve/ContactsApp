@@ -54,11 +54,12 @@ services:
   flyway:
     profiles: ["migration_tools"]
     image: flyway/flyway:latest
-    command: migrate
+    command: clean migrate
     environment:
       - FLYWAY_URL=jdbc:postgresql://contacts-db:5432/${POSTGRES_NAME_CONTACTS}
       - FLYWAY_USER=${POSTGRES_USER}
       - FLYWAY_PASSWORD=${POSTGRES_PASSWORD}
+      - FLYWAY_CLEAN_DISABLED=false
     depends_on:
       contacts-db:
         condition: service_healthy
