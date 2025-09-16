@@ -12,7 +12,7 @@ export default class ContactService {
         return this.contactRepository.getContactById(id);
     }
     async createContact(contactData: any) {
-        return this.contactRepository.createContact(contactData);
+        // return this.contactRepository.createContact(contactData);
     }
     async updateContact(id: string, contactData: any) {
         // Logic to update an existing contact

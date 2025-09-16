@@ -9,32 +9,72 @@ export default class ContactsController {
     private contactHistoryService: ContactHistoryService
   ) {} 
 
+  handleUnexpectedError(res: Response, error: unknown) {
+    console.error("Unexpected error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+
   async getAllContacts(req: Request, res: Response) {
      try{
-        //get all contacts using contactService
+        const contacts = await this.contactsService.getAllContacts();
+        res.json(contacts);
      }
     catch(error){
-        res.status(500).json({message: "Internal Server Error" });
+        this.handleUnexpectedError(res, error);
     }
   }
 
   async getContactById(req: Request, res: Response) {
-    // use contactService to get contact by id
+    const { id } = req.params;
+    try{
+        const contact = await this.contactsService.getContactById(id);
+        res.json(contact);
+     }
+    catch(error){
+        this.handleUnexpectedError(res, error);
+    }
   }
 
   async createContact(req: Request, res: Response) {
-    // use contactService to create a new contact
-    // use contactHistoryService to save the creation event in history
+    const contactData = req.body;
+    try{
+        const contact = await this.contactsService.createContact(contactData);
+        res.status(200).json({
+          message: "Contact created successfully",
+          data: contact
+        });
+     }
+    catch(error){
+        this.handleUnexpectedError(res, error);
+    }
   }
 
   async updateContact(req: Request, res: Response) {
-    // use contactService to update the contact
-    // use contactHistoryService to save the update event in history
+      const { id } = req.params;
+      const contactData = req.body;
+      try{
+          const updatedContact = await this.contactsService.updateContact(id, contactData);
+          res.status(200).json({
+          message: "Contact updated successfully",
+          data: updatedContact
+        });
+     }
+    catch(error){
+        this.handleUnexpectedError(res, error);
+    }
   }
 
 async deleteContact(req: Request, res: Response) {
-  // use contactService to delete the contact
-  // use contactHistoryService to save the deletion event in history
+    const { id } = req.params;
+      try{
+          await this.contactsService.deleteContact(id);
+          res.status(200).json({
+          message: "Contact deleted successfully",
+        });
+     }
+    catch(error){
+        this.handleUnexpectedError(res, error);
+    }
 }
 
 }
