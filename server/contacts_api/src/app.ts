@@ -3,13 +3,14 @@ import {DatabaseManager, databaseType, db_options} from '@contacts/database'
 const app = express();
 import contactsRouter from './api/routes/contactsRouter';
 import contactsHistoryRouter from './api/routes/contactsHistoryRouter';
+
 DatabaseManager.addConnection({
-    type: db_options.POSTGRES,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD 
+    type: db_options.POSTGRES as databaseType.POSTGRES,
+    host: process.env.DB_HOST as string,
+    port: process.env.DB_PORT as unknown as number,
+    database: process.env.DB_NAME as string,
+    user: process.env.DB_USER as string,
+    password: process.env.DB_PASSWORD as string
 })
 
 app.use('/users', contactsRouter);

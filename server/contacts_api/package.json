@@ -16,7 +16,8 @@
     "@contacts/database": "*",
     "express": "^5.1.0",
     "joi": "^17.13.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
