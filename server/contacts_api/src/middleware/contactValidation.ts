@@ -21,8 +21,9 @@ export const contactSchema = z.object({
     phone: phoneSchema
 });
 
-export const validateContactCreation = (req : Request, res : Response, next : NextFunction, contact : any) => {
+export const validateContactCreation = (req : Request, res : Response, next : NextFunction) => {
     try{
+        const contact = req.body;
         console.log(`Validating contact: ${JSON.stringify(contact)}`);
         contactSchema.parse(contact);
         next();
@@ -40,9 +41,9 @@ export const validateContactCreation = (req : Request, res : Response, next : Ne
     }
 };
 
-export const validateContactUpdate = (req : Request, res : Response, next : NextFunction, contact : any) => {
+export const validateContactUpdate = (req : Request, res : Response, next : NextFunction) => {
     try{
-        if(!checkValidId(req, res)) return;
+        const contact = req.body;
         console.log(`Validating contact update: ${JSON.stringify(contact)}`);
         const partialSchema = contactSchema.partial();
         partialSchema.parse(contact);
@@ -61,7 +62,7 @@ export const validateContactUpdate = (req : Request, res : Response, next : Next
     }
 };
 
-export const deleteValidation = (req : Request, res : Response, next : NextFunction) => {
+export const validateContactId = (req : Request, res : Response, next : NextFunction) => {
     if(!checkValidId(req, res)) return;
     next();
 };
@@ -69,7 +70,9 @@ export const deleteValidation = (req : Request, res : Response, next : NextFunct
 const checkValidId = (req : Request, res : Response) : boolean => {
     const { id } = req.params;
     if(!id || isNaN(Number(id))){
-        res.status(400).json({message : "Invalid or missing contact ID"});
+        res.status(400).json({
+            message : "Validation Error",
+            error : "Invalid or missing contact ID"});
         return false;
     }
     return true;

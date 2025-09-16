@@ -4,6 +4,10 @@ const app = express();
 import contactsRouter from './api/routes/contactsRouter';
 import contactsHistoryRouter from './api/routes/contactsHistoryRouter';
 
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // For form data
+
 DatabaseManager.addConnection({
     type: db_options.POSTGRES as databaseType.POSTGRES,
     host: process.env.DB_HOST as string,
