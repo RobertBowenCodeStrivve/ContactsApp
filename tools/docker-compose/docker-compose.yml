@@ -4,7 +4,7 @@ services:
       context: ../../
       dockerfile: server/contacts_api/docker/Dockerfile
     ports:
-      - "7000:3000"
+      - "3000:3000"
     environment: 
       - DB_HOST=contacts-db
       - DB_PORT=5432
