@@ -19,14 +19,14 @@ DatabaseManager.addConnection({
 const contactsRouter = new ContactsRouter().getRouter();
 const contactsHistoryRouter = new ContactsHistoryRouter().getRouter();
 
-app.use('/users', contactsRouter);
-app.use('/usersHistory', contactsHistoryRouter);
+app.use('/contacts', contactsRouter);
+app.use('/contactsHistory', contactsHistoryRouter);
 app.use((req, res) => {
   res.status(404).json({
     error: 'Not Found',
     method: req.method,
     url: req.originalUrl,
-    availableEndpoints: ['/api/users', '/api/contacts'] // optional
+    availableEndpoints: ['/api/contacts', '/api/contactsHistory/:id'] // optional
   });
 });
 

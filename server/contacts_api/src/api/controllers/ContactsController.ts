@@ -4,6 +4,8 @@ import ContactService from '../../services/ContactService';
 import ContactHistoryService from '../../services/ContactHistoryService';
 import { ContactRepository } from '../../repositories/ContactRepository';
 import { ContactHistoryRepository } from '../../repositories/ContactHistoryRepository';
+import {handleUnexpectedError} from "../../common/error_handle";
+import type { ChangeType } from '../../services/ContactHistoryService';
 export default class ContactsController {
 
   private contactsService: ContactService;
@@ -15,9 +17,8 @@ export default class ContactsController {
     this.contactHistoryService = new ContactHistoryService(new ContactHistoryRepository());
   } 
 
-  handleUnexpectedError(res: Response, error: unknown) {
-    console.error("Unexpected error:", error);
-    res.status(500).json({ message: `Internal Server Error`, error: `${error}` });
+  public async addContactHistory(changeType: ChangeType, contactId: number, changedValues: any) {
+      await this.contactHistoryService.addHistory(changeType, contactId, changedValues);
   }
 
   async getAllContacts(req: Request, res: Response) {
@@ -26,7 +27,7 @@ export default class ContactsController {
         res.json({contacts, message: "Contacts fetched successfully"});
      }
     catch(error){
-        this.handleUnexpectedError(res, error);
+        handleUnexpectedError(res, error);
     }
   }
 
@@ -38,7 +39,7 @@ export default class ContactsController {
         res.json({contacts : [contact], message: "Contact fetched successfully"});
      }
     catch(error){
-        this.handleUnexpectedError(res, error);
+        handleUnexpectedError(res, error);
     }
   }
 
@@ -46,14 +47,14 @@ export default class ContactsController {
     const contactData = req.body;
     try{
         const contact = await this.contactsService.createContact(contactData);
-        // Log the creation in contact history
+        await this.addContactHistory('CREATE', contact[0].id, contactData);
         res.status(200).json({
           message: "Contact created successfully",
           contact
         });
      }
     catch(error){
-        this.handleUnexpectedError(res, error);
+        handleUnexpectedError(res, error);
     }
   }
 
@@ -63,14 +64,14 @@ export default class ContactsController {
       const contactData = req.body;
       try{
           const updatedContact = await this.contactsService.updateContact(contactId, contactData);
-          // Log the update in contact history
+          await this.addContactHistory('UPDATE', contactId, contactData);
           res.status(200).json({
           message: "Contact updated successfully",
           contact: updatedContact
         });
      }
     catch(error){
-        this.handleUnexpectedError(res, error);
+        handleUnexpectedError(res, error);
     }
 }
 
@@ -78,15 +79,16 @@ async deleteContact(req: Request, res: Response) {
     const { id } = req.params;
     const contactData = Number(id);
     try{
-          await this.contactsService.deleteContact(contactData);
-          // Log the deletion in contact history
-          res.status(200).json({
-          message: "Contact deleted successfully",
+            await this.contactsService.deleteContact(contactData);
+            res.status(200).json({
+            message: "Contact deleted successfully",
         });
+
+        await this.addContactHistory('DELETE', contactData, null);
      }
     catch(error){
-        this.handleUnexpectedError(res, error);
+        handleUnexpectedError(res, error);
     }
-}
+  }
 
 }

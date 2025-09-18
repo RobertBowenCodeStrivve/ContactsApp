@@ -29,7 +29,6 @@ export interface ContactHistory {
   field_name: string | null;
   id: Generated<number>;
   new_value: string | null;
-  old_value: string | null;
 }
 
 export interface FlywaySchemaHistory {

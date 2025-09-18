@@ -1,11 +1,6 @@
 import { Router } from "express";
 import {validateContactCreation, validateContactUpdate, validateContactId} from "../../middleware/contactValidation";
-import { ContactRepository } from "../../repositories/ContactRepository";
-import {ContactHistoryRepository} from "../../repositories/ContactHistoryRepository";
 import ContactsController from "../controllers/ContactsController";
-import ContactService from "../../services/ContactService";
-import ContactHistoryService from "../../services/ContactHistoryService";
-import { DatabaseManager } from "@contacts/database";
 
 export default class ContactsRouter {
     private router = Router();
