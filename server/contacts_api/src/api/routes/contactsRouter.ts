@@ -5,36 +5,34 @@ import {ContactHistoryRepository} from "../../repositories/ContactHistoryReposit
 import ContactsController from "../controllers/ContactsController";
 import ContactService from "../../services/ContactService";
 import ContactHistoryService from "../../services/ContactHistoryService";
+import { DatabaseManager } from "@contacts/database";
 
-const router = Router();
-const contactRepository = new ContactRepository();
-const contactHistoryRepository = new ContactHistoryRepository();
-
-const contactService = new ContactService(contactRepository);
-const contactHistoryService = new ContactHistoryService(contactHistoryRepository);
-
-const contactsController = new ContactsController(contactService, contactHistoryService);
-
-router.use("/:id", validateContactId);
-
-router.get("/", (req, res) => {
-    contactsController.getAllContacts(req, res);
-});
-
-router.post("/", validateContactCreation, (req, res) => {
-    contactsController.createContact(req, res);
-});
-
-router.put("/:id", validateContactUpdate, (req, res) => {
-    contactsController.updateContact(req, res);
-});
-
-router.delete("/:id", (req, res) => {
-    contactsController.deleteContact(req, res);
-});
-
-router.get("/:id", (req, res) => {
-    contactsController.getContactById(req, res);
-});
-
-export default router;
+export default class ContactsRouter {
+    private router = Router();
+    private contactController: ContactsController;
+    constructor() {
+        this.contactController = new ContactsController(); 
+        this.initRoutes();   
+    }
+    public getRouter() {
+        return this.router;
+    }
+    private initRoutes() {
+        this.router.use("/:id", validateContactId);
+        this.router.get("/", (req, res) => {
+            this.contactController.getAllContacts(req, res);
+        });
+        this.router.post("/", validateContactCreation, (req, res) => {
+            this.contactController.createContact(req, res);
+        });
+        this.router.put("/:id", validateContactUpdate, (req, res) => {
+            this.contactController.updateContact(req, res);
+        });
+        this.router.delete("/:id", (req, res) => {
+            this.contactController.deleteContact(req, res);
+        });
+        this.router.get("/:id", (req, res) => {
+            this.contactController.getContactById(req, res);
+        });
+    }
+}

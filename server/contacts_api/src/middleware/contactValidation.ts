@@ -1,13 +1,16 @@
 import {z, ZodError} from 'zod';
 import { Request, Response, NextFunction } from 'express';
+
+
+
  const phoneSchema = z.string().refine(
     (phone) => {
-      const patterns = [
-        /^\+?1?[-.\s]?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/, // US
-        /^\+[1-9]\d{1,14}$/, // International E.164
-        /^[0-9]{10}$/, // 10 digits
-      ];
-      return patterns.some(pattern => pattern.test(phone));
+        const phone_patterns = [
+            /^\+?1?[-.\s]?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}$/, // US
+            /^\+[1-9]\d{1,14}$/, // International E.164
+            /^[0-9]{10}$/, // 10 digits
+        ];
+      phone_patterns.some(pattern => pattern.test(phone));
     },
     {
       message: "Invalid phone number format",
@@ -18,7 +21,7 @@ export const contactSchema = z.object({
     first_name: z.string().min(1, "first name is required").max(50, "first name is too long"),
     last_name: z.string().min(1, "last name is required").max(50, "last name is too long"),
     email: z.string().email("Invalid email address"),
-    phone: phoneSchema
+    phone_number: phoneSchema
 });
 
 export const validateContactCreation = (req : Request, res : Response, next : NextFunction) => {

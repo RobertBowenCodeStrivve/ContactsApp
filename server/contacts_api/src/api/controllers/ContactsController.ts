@@ -2,22 +2,28 @@
 import { Request, Response } from 'express';
 import ContactService from '../../services/ContactService';
 import ContactHistoryService from '../../services/ContactHistoryService';
+import { ContactRepository } from '../../repositories/ContactRepository';
+import { ContactHistoryRepository } from '../../repositories/ContactHistoryRepository';
 export default class ContactsController {
 
+  private contactsService: ContactService;
+  private contactHistoryService: ContactHistoryService;
+
   constructor(
-    private contactsService: ContactService,
-    private contactHistoryService: ContactHistoryService
-  ) {} 
+  ) {
+    this.contactsService = new ContactService(new ContactRepository());
+    this.contactHistoryService = new ContactHistoryService(new ContactHistoryRepository());
+  } 
 
   handleUnexpectedError(res: Response, error: unknown) {
     console.error("Unexpected error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: `Internal Server Error`, error: `${error}` });
   }
 
   async getAllContacts(req: Request, res: Response) {
      try{
         const contacts = await this.contactsService.getAllContacts();
-        res.json(contacts);
+        res.json({contacts, message: "Contacts fetched successfully"});
      }
     catch(error){
         this.handleUnexpectedError(res, error);
@@ -26,9 +32,10 @@ export default class ContactsController {
 
   async getContactById(req: Request, res: Response) {
     const { id } = req.params;
+    const contactId = Number(id);
     try{
-        const contact = await this.contactsService.getContactById(id);
-        res.json(contact);
+        const contact = await this.contactsService.getContactById(contactId);
+        res.json({contacts : [contact], message: "Contact fetched successfully"});
      }
     catch(error){
         this.handleUnexpectedError(res, error);
@@ -42,7 +49,7 @@ export default class ContactsController {
         // Log the creation in contact history
         res.status(200).json({
           message: "Contact created successfully",
-          data: contact
+          contact
         });
      }
     catch(error){

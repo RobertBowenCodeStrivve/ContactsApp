@@ -8,19 +8,13 @@ export default class ContactService {
     async getAllContacts() {
         return this.contactRepository.getAllContacts();
     }
-    async getContactById(id: string) {
+    async getContactById(id: number) {
         return this.contactRepository.getContactById(id);
     }
     async createContact(contactData: any) {
-
-        /***
-         * if contact with same email or phone number exists, throw error
-         * 
-         * 
-         * create the contact
-         */
-        
+        return await this.contactRepository.createContact(contactData);           
     }
+
     async updateContact(id: string, contactData: any) {
         /**
          * 

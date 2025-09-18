@@ -7,6 +7,8 @@
     "strict": true,                     // Enable strict type-checking options
     "esModuleInterop": true,            // Allow default imports from CommonJS modules
     "skipLibCheck": true,               // Skip type checking of declaration files
+    "sourceMap": true,
+      "declarationMap": true,
     "resolveJsonModule": true,          // Allow importing JSON files
     "moduleResolution": "node",         // Use Node.js module resolution
     "allowJs": true,                    // Allow JavaScript files in the project

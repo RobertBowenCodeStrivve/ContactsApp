@@ -1,9 +1,8 @@
 import express, { Request, Response } from 'express';
 import {DatabaseManager, databaseType, db_options} from '@contacts/database'
 const app = express();
-import contactsRouter from './api/routes/contactsRouter';
-import contactsHistoryRouter from './api/routes/contactsHistoryRouter';
-
+import ContactsRouter from './api/routes/ContactsRouter';
+import ContactsHistoryRouter from './api/routes/ContactsHistoryRouter';
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // For form data
@@ -16,6 +15,9 @@ DatabaseManager.addConnection({
     user: process.env.DB_USER as string,
     password: process.env.DB_PASSWORD as string
 })
+
+const contactsRouter = new ContactsRouter().getRouter();
+const contactsHistoryRouter = new ContactsHistoryRouter().getRouter();
 
 app.use('/users', contactsRouter);
 app.use('/usersHistory', contactsHistoryRouter);

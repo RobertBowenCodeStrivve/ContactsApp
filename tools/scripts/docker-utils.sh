@@ -10,7 +10,8 @@
 
 _docker_compose_contacts() {
     _check_contacts_home || return 1
-    (cd "$CONTACTS_HOME/tools/docker-compose" && docker-compose -p contactsapp "$@")
+    COMPOSE_DIR="$CONTACTS_HOME/tools/docker-compose"
+    (cd "$COMPOSE_DIR" && docker compose -p contactsapp "$@")
 }
 
 _check_contacts_home() {

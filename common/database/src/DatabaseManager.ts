@@ -63,7 +63,7 @@ export default class DatabaseManager {
         return DatabaseManager.getConnection(config.database)
     }
 
-    public static getConnection(name : string)
+    public static getConnection(name : string) : Kysely<DB>
     {
         if(DatabaseManager.database.has(name))
         {
