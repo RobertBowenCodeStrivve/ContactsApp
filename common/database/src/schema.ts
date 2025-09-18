@@ -22,6 +22,7 @@ export interface Contact {
 }
 
 export interface ContactHistory {
+  batch_id: string | null;
   change_type: string;
   changed_at: Generated<Timestamp | null>;
   contact_id: number;
