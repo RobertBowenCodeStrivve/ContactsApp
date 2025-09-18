@@ -36,7 +36,7 @@ export class ContactHistoryRepository {
             .values(historyRecord)
             .returningAll()
             .executeTakeFirstOrThrow();
-        }
+        } //okay so the issue is that the c
         catch(error : any){
             console.error("Error adding contact history:", error);
             throw new Error(`Failed to add contact history: ${error.message}`);

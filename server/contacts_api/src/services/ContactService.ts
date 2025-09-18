@@ -2,7 +2,6 @@
 import { ContactRepository } from "../repositories/ContactRepository";
 
 export default class ContactService {
-
     constructor(private contactRepository: ContactRepository) {}
     
     async getAllContacts() {

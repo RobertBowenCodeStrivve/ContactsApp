@@ -83,8 +83,6 @@ async deleteContact(req: Request, res: Response) {
             res.status(200).json({
             message: "Contact deleted successfully",
         });
-
-        await this.addContactHistory('DELETE', contactData, null);
      }
     catch(error){
         handleUnexpectedError(res, error);

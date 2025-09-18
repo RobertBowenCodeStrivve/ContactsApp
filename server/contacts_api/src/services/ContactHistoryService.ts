@@ -1,11 +1,10 @@
 import { ContactHistoryRepository } from "../repositories/ContactHistoryRepository";
-export type ChangeType = 'CREATE' | 'UPDATE' | 'DELETE';
+export type ChangeType = 'CREATE' | 'UPDATE';
 
 export default class ContactHistoryService {
     private valid_change_types: Record<ChangeType, ChangeType> = {
     "CREATE": 'CREATE',
     'UPDATE': 'UPDATE',
-    'DELETE': 'DELETE'
   };
     constructor(private contactHistoryRepository: ContactHistoryRepository) {}
 
@@ -21,15 +20,14 @@ export default class ContactHistoryService {
     public async addHistory(type: ChangeType, contactId: number, changes: any) {
         if(!this.valid_change_types[type]) {
             throw new Error(`Invalid change type: ${type}`);
-        }   
+        }
+
         const batchId = this.generateBatchId();
-        if(!changes) { //single deletion or no changes
-            if(type !== 'DELETE') {
-                throw new Error('No changes provided for non-deletion operation');
-            }
+        if(!changes) {  // no changes
             this.contactHistoryRepository.addHistory(type, null, null, contactId, batchId);
             return;
         }
+
         for(const [key, value] of Object.entries(changes)) {
             if(this.check_valid_field(key)) {
                 await this.contactHistoryRepository.addHistory(type, key, JSON.stringify(value), contactId, batchId);
