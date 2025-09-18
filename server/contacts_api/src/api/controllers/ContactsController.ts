@@ -75,8 +75,9 @@ export default class ContactsController {
 
 async deleteContact(req: Request, res: Response) {
     const { id } = req.params;
-      try{
-          await this.contactsService.deleteContact(id);
+    const contactData = Number(id);
+    try{
+          await this.contactsService.deleteContact(contactData);
           // Log the deletion in contact history
           res.status(200).json({
           message: "Contact deleted successfully",

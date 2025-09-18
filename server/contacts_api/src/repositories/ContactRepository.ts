@@ -62,10 +62,25 @@ export class ContactRepository {
     }
 
     public async updateContact(id: string, contactData: any) {
+
         // Logic to update an existing contact in the database
     }
 
-    public async deleteContact(id: string) {
-        // Logic to delete a contact from the database
+    public async deleteContact(id: number) {
+        try {
+            const deletedRows = await this.db
+                .deleteFrom('contact')
+                .where('id', '=', id)
+                .executeTakeFirst();
+                
+            if (deletedRows.numDeletedRows === BigInt(0)) {
+                throw new Error('Contact not found or already deleted');
+            }
+
+            return { message: 'Contact deleted successfully', deletedRows: deletedRows.numDeletedRows };
+        } catch (error : any) {
+            console.error('Error deleting contact: ', error);
+            throw new Error(`Failed to delete contact: ${error.message}`); // Rethrow the error with a custom message
+        }
     }
 }

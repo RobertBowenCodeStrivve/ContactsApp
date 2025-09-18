@@ -27,13 +27,7 @@ export default class ContactService {
          * 
          */
     }
-    async deleteContact(id: string) {
-        /**
-         * 
-         * check if contact exists
-         * if not, throw error
-         * 
-         */
-        // Logic to delete a contact
+    async deleteContact(id: number) {
+        return await this.contactRepository.deleteContact(id);
     }
 }
