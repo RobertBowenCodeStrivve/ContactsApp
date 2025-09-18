@@ -59,13 +59,14 @@ export default class ContactsController {
 
   async updateContact(req: Request, res: Response) {
       const { id } = req.params;
+      const contactId = Number(id);
       const contactData = req.body;
       try{
-          const updatedContact = await this.contactsService.updateContact(id, contactData);
+          const updatedContact = await this.contactsService.updateContact(contactId, contactData);
           // Log the update in contact history
           res.status(200).json({
           message: "Contact updated successfully",
-          data: updatedContact
+          contact: updatedContact
         });
      }
     catch(error){

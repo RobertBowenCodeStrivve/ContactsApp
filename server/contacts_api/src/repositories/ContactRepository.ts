@@ -61,9 +61,19 @@ export class ContactRepository {
         }
     }
 
-    public async updateContact(id: string, contactData: any) {
-
-        // Logic to update an existing contact in the database
+    public async updateContact(id: number, contactData: any) {
+        try{
+            const updatedRows = await this.db.updateTable('contact')
+            .set(contactData)
+            .where('id', '=', id)
+            .returningAll()
+            .executeTakeFirst();
+            return updatedRows;
+        }
+        catch(err: any){
+            console.error("Error updating contact:", err);
+            throw new Error(`Failed to update contact: ${err.message}`) ;
+        }
     }
 
     public async deleteContact(id: number) {
