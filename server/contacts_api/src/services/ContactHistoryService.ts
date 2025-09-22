@@ -1,4 +1,6 @@
 import { ContactHistoryRepository } from "../repositories/ContactHistoryRepository";
+import type {DB} from '@contacts/database'
+import { Transaction } from "kysely";
 export type ChangeType = 'CREATE' | 'UPDATE';
 
 export default class ContactHistoryService {
@@ -17,20 +19,15 @@ export default class ContactHistoryService {
         return valid_fields.includes(field);
     }
 
-    public async addHistory(type: ChangeType, contactId: number, changes: any) {
+    public async addHistory(type: ChangeType, contactId: number, changes: any, trx? : Transaction<DB>) {
         if(!this.valid_change_types[type]) {
             throw new Error(`Invalid change type: ${type}`);
         }
 
         const batchId = this.generateBatchId();
-        if(!changes) {  // no changes
-            this.contactHistoryRepository.addHistory(type, null, null, contactId, batchId);
-            return;
-        }
-
         for(const [key, value] of Object.entries(changes)) {
             if(this.check_valid_field(key)) {
-                await this.contactHistoryRepository.addHistory(type, key, JSON.stringify(value), contactId, batchId);
+                await this.contactHistoryRepository.addHistory(type, key, JSON.stringify(value), contactId, batchId, trx);
             }
         }
     }

@@ -1,7 +1,7 @@
 
 import type {Contact, ContactHistory, DB} from '@contacts/database'
 import { DatabaseManager } from "@contacts/database";
-import type { Kysely } from "kysely";
+import type { Kysely, Transaction} from "kysely";
 export class ContactHistoryRepository {
 
     private db: Kysely<DB>;
@@ -22,7 +22,7 @@ export class ContactHistoryRepository {
          return history;
     }
 
-    public async addHistory(changeType: string, fieldName: string | null, newValue: string | null, contactId: number, batchId: string) {
+    public async addHistory(changeType: string, fieldName: string | null, newValue: string | null, contactId: number, batchId: string,  trx: Kysely<DB> | Transaction<DB> = this.db) {
         const historyRecord= {
             batch_id: batchId,
             change_type: changeType,
@@ -36,7 +36,7 @@ export class ContactHistoryRepository {
             .values(historyRecord)
             .returningAll()
             .executeTakeFirstOrThrow();
-        } //okay so the issue is that the c
+        }
         catch(error : any){
             console.error("Error adding contact history:", error);
             throw new Error(`Failed to add contact history: ${error.message}`);

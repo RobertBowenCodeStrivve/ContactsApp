@@ -1,6 +1,6 @@
 import type {Contact, DB} from '@contacts/database'
 import { DatabaseManager } from "@contacts/database";
-import type { Kysely } from "kysely";
+import type { Kysely, Transaction } from "kysely";
 export class ContactRepository {
 
     private db: Kysely<DB>;
@@ -8,35 +8,7 @@ export class ContactRepository {
     {
         this.db = DatabaseManager.getConnection(process.env.DB_NAME as string);
     }
-
-    public async createContact(contact : any) {
-
-        const new_contact = {
-            email: contact.email as string,
-            first_name: contact.first_name as string,
-            last_name: contact.last_name as string,
-            phone_number: contact.phone_number as string,
-        }
-
-        try{
-            return await this.db.insertInto('contact').values(new_contact).returningAll().execute();
-        }
-        catch(error : any)
-        {
-            console.error('Error creating contact:', error);
-            const prefix_error = 'Failed to create contact:';
-            if (!(error.code === '23505')) { //if not unique violation
-                throw new Error(`${prefix_error} An unexpected error occurred`);
-            } 
-            // Or check the detail message
-            if (error.detail?.includes('email')) {
-                throw new Error(`${prefix_error} Email already exists`)
-            }
-            // Generic fallback
-            throw new Error(`${prefix_error} Duplicate value detected`)
-        }
-    }
-
+    
     public async getAllContacts() {
         const contacts = await this.db
             .selectFrom('contact')
@@ -61,18 +33,54 @@ export class ContactRepository {
         }
     }
 
-    public async updateContact(id: number, contactData: any) {
+    public async createContact(contact: any, trx: Kysely<DB> | Transaction<DB> = this.db) {
+        const new_contact = {
+            email: contact.email as string,
+            first_name: contact.first_name as string,
+            last_name: contact.last_name as string,
+            phone_number: contact.phone_number as string,
+        }
         try{
-            const updatedRows = await this.db.updateTable('contact')
+            return await trx.insertInto('contact').values(new_contact).returningAll().execute();
+        }
+        catch(error : any)
+        {
+            console.error('Error creating contact:', error);
+            const prefix_error = 'Failed to create contact:';
+            if (!(error.code === '23505')) { //if not unique violation
+                throw new Error(`${prefix_error} An unexpected error occurred`);
+            }
+            // Check the detail message
+            if (error.detail?.includes('email')) {
+                throw new Error(`${prefix_error} Email already exists`)
+            }
+            // Generic fallback
+            throw new Error(`${prefix_error} Duplicate value detected`)
+        }
+    }
+
+    public async updateContact(id: number, contactData: any, trx: Kysely<DB> | Transaction<DB> = this.db) {
+        try{
+            const updatedRows = await trx.updateTable('contact')
             .set(contactData)
             .where('id', '=', id)
             .returningAll()
             .executeTakeFirst();
             return updatedRows;
         }
-        catch(err: any){
-            console.error("Error updating contact:", err);
-            throw new Error(`Failed to update contact: ${err.message}`) ;
+catch(error : any)
+        {
+            console.error('Error updating contact:', error);
+            const prefix_error = 'Failed to update contact:';
+            if (!(error.code === '23505')) { //if not unique violation
+                throw new Error(`${prefix_error} An unexpected error occurred`);
+            }
+            // Check the detail message
+            if (error.detail?.includes('email')) {
+                throw new Error(`${prefix_error} Email already exists`)
+            }
+            // Generic fallback
+            throw new Error(`${prefix_error} Duplicate value detected`)
         }
     }
 
@@ -82,11 +90,9 @@ export class ContactRepository {
                 .deleteFrom('contact')
                 .where('id', '=', id)
                 .executeTakeFirst();
-                
             if (deletedRows.numDeletedRows === BigInt(0)) {
                 throw new Error('Contact not found or already deleted');
             }
-
             return { message: 'Contact deleted successfully', deletedRows: deletedRows.numDeletedRows };
         } catch (error : any) {
             console.error('Error deleting contact: ', error);

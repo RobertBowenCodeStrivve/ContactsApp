@@ -14,20 +14,22 @@ export default class ContactsRouter {
     }
     private initRoutes() {
         this.router.use("/:id", validateContactId);
-        this.router.get("/", (req, res) => {
-            this.contactController.getAllContacts(req, res);
+        this.router.get("/", async (req, res) => {
+            await this.contactController.getAllContacts(req, res);
         });
-        this.router.post("/", validateContactCreation, (req, res) => {
-            this.contactController.createContact(req, res);
+        this.router.post("/", validateContactCreation, async (req, res) => {
+            setTimeout(async () => {
+                await this.contactController.createContact(req, res);
+            }, 20000);
         });
-        this.router.put("/:id", validateContactUpdate, (req, res) => {
-            this.contactController.updateContact(req, res);
+        this.router.put("/:id", validateContactUpdate, async (req, res) => {
+            await this.contactController.updateContact(req, res);
         });
-        this.router.delete("/:id", (req, res) => {
-            this.contactController.deleteContact(req, res);
+        this.router.delete("/:id", async (req, res) => {
+            await this.contactController.deleteContact(req, res);
         });
-        this.router.get("/:id", (req, res) => {
-            this.contactController.getContactById(req, res);
+        this.router.get("/:id", async (req, res) => {
+            await this.contactController.getContactById(req, res);
         });
     }
 }

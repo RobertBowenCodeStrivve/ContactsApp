@@ -11,11 +11,10 @@ export default class ContactService {
         return this.contactRepository.getContactById(id);
     }
     async createContact(contactData: any) {
-        return await this.contactRepository.createContact(contactData);           
+        return await this.contactRepository.createContact(contactData);
     }
-
-    async updateContact(id: number, newContactData: any) {
-        return await this.contactRepository.updateContact(id, newContactData);
+    async updateContact(id: number, newContactData: any, trx?: any) {
+        return await this.contactRepository.updateContact(id, newContactData, trx);
     }
     async deleteContact(id: number) {
         return await this.contactRepository.deleteContact(id);
