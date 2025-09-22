@@ -5,8 +5,8 @@ import { ContactEventTypes } from './events/ContactEmitter';
 const app = express();
 import { WebSocketServer } from 'ws';
 import {createServer} from 'http';
-import ContactsRouter from './api/routes/ContactsRouter';
-import ContactsHistoryRouter from './api/routes/ContactsHistoryRouter';
+import ContactsRouter from './api/routes/contactsRouter';
+import ContactsHistoryRouter from './api/routes/contactsHistoryRouter';
 import { contactEventEmitter} from './events/ContactEmitter';
 
 //express middleware
