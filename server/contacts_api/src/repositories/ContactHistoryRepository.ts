@@ -10,7 +10,6 @@ export class ContactHistoryRepository {
     }
 
     public async getContactHistory(contactId: number) {
-        //').where('batch_id', 'is not', null)      // WHERE batch_id IS NOT NULL .groupBy('batch_id')
         const history = await this.db.selectFrom('contact_history')
             .selectAll()
             .where('contact_id', '=', contactId)

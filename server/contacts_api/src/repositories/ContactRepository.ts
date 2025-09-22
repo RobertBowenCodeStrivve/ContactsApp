@@ -47,14 +47,14 @@ export class ContactRepository {
         {
             console.error('Error creating contact:', error);
             const prefix_error = 'Failed to create contact:';
-            if (!(error.code === '23505')) { //if not unique violation
+            if (!(error.code === '23505')) { 
                 throw new Error(`${prefix_error} An unexpected error occurred`);
             }
-            // Check the detail message
+            
             if (error.detail?.includes('email')) {
                 throw new Error(`${prefix_error} Email already exists`)
             }
-            // Generic fallback
+            
             throw new Error(`${prefix_error} Duplicate value detected`)
         }
     }
@@ -68,18 +68,16 @@ export class ContactRepository {
             .executeTakeFirst();
             return updatedRows;
         }
-catch(error : any)
+        catch(error : any)
         {
             console.error('Error updating contact:', error);
             const prefix_error = 'Failed to update contact:';
-            if (!(error.code === '23505')) { //if not unique violation
+            if (!(error.code === '23505')) { 
                 throw new Error(`${prefix_error} An unexpected error occurred`);
             }
-            // Check the detail message
             if (error.detail?.includes('email')) {
                 throw new Error(`${prefix_error} Email already exists`)
             }
-            // Generic fallback
             throw new Error(`${prefix_error} Duplicate value detected`)
         }
     }
