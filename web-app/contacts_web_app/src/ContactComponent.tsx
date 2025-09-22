@@ -4,7 +4,7 @@ import type { Contact, ContactHistory } from './types';
   interface ContactProps {
     contact: Contact;
     onUpdate: (contact: Contact) => void;
-    onDelete: (contactId: string) => void; // New prop
+    onDelete: (contactId: string) => void;
   }
 
   const ContactComponent: React.FC<ContactProps> = ({ contact, onUpdate, onDelete }) => {
@@ -14,10 +14,15 @@ import type { Contact, ContactHistory } from './types';
     const [history, setHistory] = useState<ContactHistory[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const [updating, setUpdating] = useState(false);
+    const [updateError, setUpdateError] = useState('');
 
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
     const handleSubmitEdit = async () => {
+      setUpdating(true);
+      setUpdateError('');
+
       try {
         const response = await fetch(`${apiUrl}/contacts/${contact.id}`, {
           method: 'PUT',
@@ -29,11 +34,16 @@ import type { Contact, ContactHistory } from './types';
           const updatedContact = await response.json();
           onUpdate(updatedContact);
           setIsEditing(false);
+          setUpdateError('');
         } else {
-          console.error('Failed to update contact');
+          const errorData = await response.json().catch(() => ({}));
+          setUpdateError(errorData.message || `Failed to update contact (${response.status})`);
         }
       } catch (error) {
+        setUpdateError('Network error: Unable to update contact');
         console.error('Error updating contact:', error);
+      } finally {
+        setUpdating(false);
       }
     };
 
@@ -87,6 +97,7 @@ import type { Contact, ContactHistory } from './types';
     const cancelEdit = () => {
       setEditedContact(contact);
       setIsEditing(false);
+      setUpdateError('');
     };
 
     if (isEditing) {
@@ -98,6 +109,7 @@ import type { Contact, ContactHistory } from './types';
               type="text"
               value={editedContact.first_name}
               onChange={(e) => setEditedContact({...editedContact, first_name: e.target.value})}
+              disabled={updating}
             />
           </div>
 
@@ -107,6 +119,7 @@ import type { Contact, ContactHistory } from './types';
               type="text"
               value={editedContact.last_name}
               onChange={(e) => setEditedContact({...editedContact, last_name: e.target.value})}
+              disabled={updating}
             />
           </div>
 
@@ -116,6 +129,7 @@ import type { Contact, ContactHistory } from './types';
               type="email"
               value={editedContact.email}
               onChange={(e) => setEditedContact({...editedContact, email: e.target.value})}
+              disabled={updating}
             />
           </div>
 
@@ -125,14 +139,36 @@ import type { Contact, ContactHistory } from './types';
               type="tel"
               value={editedContact.phone_number}
               onChange={(e) => setEditedContact({...editedContact, phone_number: e.target.value})}
+              disabled={updating}
             />
           </div>
 
+          {updateError && (
+            <div className="error-message">
+              ⚠️ {updateError}
+            </div>
+          )}
+
           <div className="button-group">
-            <button onClick={handleSubmitEdit} className="submit-btn">
-              Submit Edit
+            <button
+              onClick={handleSubmitEdit}
+              className="submit-btn"
+              disabled={updating}
+            >
+              {updating ? (
+                <span className="loading-spinner">
+                  <span className="spinner"></span>
+                  Updating...
+                </span>
+              ) : (
+                'Submit Edit'
+              )}
             </button>
-            <button onClick={cancelEdit} className="cancel-btn">
+            <button
+              onClick={cancelEdit}
+              className="cancel-btn"
+              disabled={updating}
+            >
               Cancel
             </button>
           </div>
