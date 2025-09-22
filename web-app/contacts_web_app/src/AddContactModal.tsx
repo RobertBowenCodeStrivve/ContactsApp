@@ -32,7 +32,7 @@ import type { Contact } from './types';
         });
 
         if (response.ok) {
-          const createdContact = await response.json();
+          const createdContact = (await response.json()).contact;
           onContactAdded(createdContact);
           setNewContact({ first_name: '', last_name: '', email: '', phone_number: '' });
           onClose();

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Contact, ContactHistory } from './types';
-
+import {History} from './History';
   interface ContactProps {
     contact: Contact;
     onUpdate: (contact: Contact) => void;
@@ -21,18 +21,26 @@ import type { Contact, ContactHistory } from './types';
 
     const handleSubmitEdit = async () => {
       setUpdating(true);
+      setShowHistory(false);
       setUpdateError('');
-
       try {
+        const contactEdits = { //only want to send changed fields
+          first_name: editedContact.first_name.trim() === contact.first_name ? undefined : editedContact.first_name.trim(),
+          last_name: editedContact.last_name.trim() === contact.last_name ? undefined : editedContact.last_name.trim(),
+          email: editedContact.email.trim() === contact.email ? undefined : editedContact.email.trim(),
+          phone_number: editedContact.phone_number.trim() === contact.phone_number ? undefined : editedContact.phone_number.trim()
+        };
+
         const response = await fetch(`${apiUrl}/contacts/${contact.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(editedContact)
+          body: JSON.stringify(contactEdits)
         });
 
         if (response.ok) {
-          const updatedContact = await response.json();
+          const updatedContact = (await response.json()).contact;
           onUpdate(updatedContact);
+          setHistory([]); //clear history to force refetch
           setIsEditing(false);
           setUpdateError('');
         } else {
@@ -71,12 +79,12 @@ import type { Contact, ContactHistory } from './types';
     };
 
     const fetchHistory = async () => {
-      if (showHistory && history.length === 0) {
+      if (history.length === 0) {
         setLoadingHistory(true);
         try {
-          const response = await fetch(`http://localhost:3000/contactsHistory/${contact.id}`);
+          const response = await fetch(`${apiUrl}/contactsHistory/${contact.id}`);
           if (response.ok) {
-            const historyData = await response.json();
+            const historyData = (await response.json()).history;
             setHistory(historyData);
           }
         } catch (error) {
@@ -203,25 +211,10 @@ import type { Contact, ContactHistory } from './types';
         </div>
 
         {showHistory && (
-          <div className="contact-history">
-            <h4>Contact History</h4>
-            {loadingHistory ? (
-              <p>Loading history...</p>
-            ) : history.length > 0 ? (
-              <ul>
-                {history.map((item) => (
-                  <li key={item.id} className="history-item">
-                    <strong>{item.field_changed}</strong> changed from "{item.old_value}" to "{item.new_value}"
-                    <span className="history-date">
-                      {new Date(item.changed_at).toLocaleDateString()}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No history available</p>
-            )}
-          </div>
+          <History
+            history={history}
+            loading={loadingHistory}
+            />
         )}
       </div>
     );

@@ -6,11 +6,19 @@ export interface Contact {
     phone_number: string;
   }
 
-  export interface ContactHistory {
-    id: string;
+export interface ContactHistory {
+    id: number;
     contact_id: string;
-    field_changed: string;
-    old_value: string;
+    batch_id: string;
+    change_type: 'CREATE' | 'UPDATE' | 'DELETE';
+    field_name: string;
     new_value: string;
     changed_at: string;
-  }
+    }
+
+export interface HistoryBatch {
+  id: number;
+  changes : ContactHistory[];
+  batch_id: string; 
+  changed_at: string;
+} 

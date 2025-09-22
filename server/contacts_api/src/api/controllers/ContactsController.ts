@@ -46,7 +46,7 @@ export default class ContactsController {
       await this.contactHistoryService.addHistory('CREATE', contact[0].id, contactData); // not worried about race condition as create will always happen before update
       res.status(200).json({
         message: "Contact created successfully",
-        contact
+        contact : contact[0]
       });
     }
     catch(error){

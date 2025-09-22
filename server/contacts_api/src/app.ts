@@ -6,7 +6,7 @@ import ContactsRouter from './api/routes/ContactsRouter';
 import ContactsHistoryRouter from './api/routes/ContactsHistoryRouter';
 
 app.use(cors({
-  origin: [`${process.env.VITE_URL}`], //for vite
+  origin: [`${process.env.VITE_URL}`, `${process.env.VITE_DEBUG_URL}`], //for vite
   credentials: true
 }));
 app.use(express.json());

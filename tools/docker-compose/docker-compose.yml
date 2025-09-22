@@ -13,6 +13,7 @@ services:
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - environment=localstack
       - VITE_URL=${VITE_URL}
+      - VITE_DEBUG_URL=${VITE_DEBUG_URL}
     depends_on:
       contacts-db:
         condition: service_healthy
