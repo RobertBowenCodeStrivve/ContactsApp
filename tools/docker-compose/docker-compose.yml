@@ -37,6 +37,22 @@ services:
       retries: 5
     networks:
       - contacts-network
+
+  contacts-web-app:
+    build:
+      context: ../../
+      dockerfile: web-app/contacts_web_app/docker/Dockerfile
+    ports:
+      - "4173:4173"
+    environment: 
+      - CONTACT_API_URL=http://localhost:3000
+      - environment=localstack
+    depends_on:
+      contacts-db:
+        condition: service_healthy
+    networks:
+      - contacts-network
+
   schema-codegen:
     profiles: ["migration_tools"]
     image: node:22

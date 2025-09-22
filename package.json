@@ -10,7 +10,7 @@
   "workspaces": [
     "common/*",
     "server/*",
-    "web-apps/*"
+    "web-app/*"
   ],
   "keywords": [],
   "author": "Robert Bowen",

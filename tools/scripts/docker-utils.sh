@@ -67,7 +67,7 @@ contacts() {
                     ;;
                 *)
                     echo "Usage: contacts stack [up|down|restart|status] [service]"
-                    echo "Services: contacts-api, contacts-db, flyway"
+                    echo "Services: contacts-api, contacts-db, flyway, contacts-web-app, schema-codegen"
                     ;;
             esac
             ;;
