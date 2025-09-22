@@ -15,10 +15,12 @@
   "dependencies": {
     "@contacts/database": "*",
     "@types/cors": "^2.8.19",
+    "@types/ws": "^8.18.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "joi": "^17.13.3",
     "typescript": "^5.8.3",
+    "ws": "^8.18.3",
     "zod": "^4.1.8"
   },
   "devDependencies": {

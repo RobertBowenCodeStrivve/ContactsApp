@@ -6,6 +6,8 @@ import { ContactRepository } from '../../repositories/ContactRepository';
 import { ContactHistoryRepository } from '../../repositories/ContactHistoryRepository';
 import { TransactionRepository } from '../../repositories/TransactionRepository';
 import {handleUnexpectedError} from "../../common/error_handle";
+import { contactEventEmitter, ContactEventTypes  } from '../../events/ContactEmitter';
+
 export default class ContactsController {
 
   private contactsService: ContactService;
@@ -48,6 +50,7 @@ export default class ContactsController {
         message: "Contact created successfully",
         contact : contact[0]
       });
+      contactEventEmitter.emit(ContactEventTypes.CREATED, contact[0]);
     }
     catch(error){
         handleUnexpectedError(res, error);
@@ -61,11 +64,12 @@ export default class ContactsController {
       try{
         await TransactionRepository.executeSingleTransaction(async (trx) => { //we want to update contact and add history in single transaction so that history and contact will be consistent
             const updatedContact = await this.contactsService.updateContact(contactId, contactData);
-            await this.contactHistoryService.addHistory('UPDATE', contactId, contactData, trx);
+            const history_update_batch = await this.contactHistoryService.addHistory('UPDATE', contactId, contactData, trx);
             res.status(200).json({
               message: "Contact updated successfully",
               contact: updatedContact
             });
+            contactEventEmitter.emit(ContactEventTypes.UPDATED, history_update_batch);
         });
      }
     catch(error){
@@ -80,7 +84,9 @@ async deleteContact(req: Request, res: Response) {
             await this.contactsService.deleteContact(contactData);
             res.status(200).json({
             message: "Contact deleted successfully",
-        });
+            id : contactData
+            });
+            contactEventEmitter.emit(ContactEventTypes.DELETED, contactData);
      }
     catch(error){
         handleUnexpectedError(res, error);

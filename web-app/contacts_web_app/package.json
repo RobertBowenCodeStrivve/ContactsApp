@@ -1,5 +1,5 @@
 {
-  "name": "contacts-react-app",
+  "name": "@contacts/web-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",

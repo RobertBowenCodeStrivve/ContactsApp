@@ -20,7 +20,7 @@ export default class ContactsRouter {
         this.router.post("/", validateContactCreation, async (req, res) => {
             setTimeout(async () => {
                 await this.contactController.createContact(req, res);
-            }, 20000);
+            }, 2000);
         });
         this.router.put("/:id", validateContactUpdate, async (req, res) => {
             await this.contactController.updateContact(req, res);

@@ -9,7 +9,6 @@ COPY package-lock.json ./
 
 # Copy necessary workspace files
 COPY web-app ./web-app
-
 # Install dependencies for all workspaces and compile TypeScript
 RUN npm run build
 

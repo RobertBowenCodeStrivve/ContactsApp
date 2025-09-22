@@ -2,13 +2,32 @@
   import ContactComponent from './ContactComponent';
   import AddContactModal from './AddContactModal';
   import type { Contact } from './types';
+  import {useWebSocket, ContactEventTypes} from './events/useWebSocket';
+
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
   const ContactList: React.FC = () => {
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
+    const { lastMessage } = useWebSocket(apiUrl);
+    
+    useEffect(() => {
+      if (lastMessage) {
+        switch (lastMessage.event) {
+          case ContactEventTypes.DELETED:
+            handleContactDelete(lastMessage.data);
+            break;
+          case ContactEventTypes.CREATED:
+            handleContactAdded(lastMessage.data);
+            break;
+          default:
+            break;
+        }
+      }
+    }, [lastMessage]);
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 
     useEffect(() => {
       fetchContacts();
@@ -38,7 +57,9 @@
     };
 
     const handleContactAdded = (newContact: Contact) => {
-      setContacts([...contacts, newContact]);
+      if(!contacts.find(c => c.id === newContact.id)) {
+        setContacts([...contacts, newContact]);
+      }
     };
 
     if (loading) return <div>Loading contacts...</div>;

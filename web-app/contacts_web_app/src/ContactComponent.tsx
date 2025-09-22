@@ -1,23 +1,113 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Contact, ContactHistory } from './types';
 import {History} from './History';
+  import {useWebSocket, ContactEventTypes} from './events/useWebSocket';
   interface ContactProps {
     contact: Contact;
     onUpdate: (contact: Contact) => void;
     onDelete: (contactId: string) => void;
   }
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
   const ContactComponent: React.FC<ContactProps> = ({ contact, onUpdate, onDelete }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedContact, setEditedContact] = useState(contact);
     const [showHistory, setShowHistory] = useState(false);
     const [history, setHistory] = useState<ContactHistory[]>([]);
+    const [mostRecentChangeId, setMostRecentChangeId] = useState<number>(0);
+    const [historyBatch, setHistoryBatch] = useState<Set<string> | null>(null);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [deleting, setDeleting] = useState(false);
     const [updating, setUpdating] = useState(false);
     const [updateError, setUpdateError] = useState('');
+    const { lastMessage } = useWebSocket(apiUrl);
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const fetchHistory = async () => {
+      if (history.length === 0) {
+        setLoadingHistory(true);
+        try {
+          const response = await fetch(`${apiUrl}/contactsHistory/${contact.id}`);
+          if (response.ok) {
+            const historyData = (await response.json()).history;
+            setHistory(historyData);
+            let mostRecentChangeId = 0;
+            const batchIds = new Set<string>(historyData.map((h: ContactHistory) => { 
+              mostRecentChangeId = Math.max(mostRecentChangeId, h.id);
+              return h.batch_id; 
+            }));
+            setHistoryBatch(batchIds);
+            setMostRecentChangeId(mostRecentChangeId);
+          }
+        } catch (error) {
+          console.error('Error fetching history:', error);
+        } finally {
+          setLoadingHistory(false);
+        }
+      }
+    };
+
+    useEffect(() => {
+        fetchHistory();
+    }, []);
+
+    const mergeUpdatedContact = (editedHistory: ContactHistory[]) => {
+      if(editedHistory.length === 0) return;
+
+      const sorted = editedHistory.sort((a, b) => a.id - b.id);
+      const current_batch = sorted[0].batch_id;
+      const apply_changes = sorted[0].id > mostRecentChangeId //if the change id is larger than the last change we have, we should apply it
+      let add_to_history = true;
+
+      setMostRecentChangeId(prev => Math.max(prev, sorted[sorted.length - 1].id));
+
+      for(const batch of historyBatch!){
+        if(batch === current_batch){ //it's already present in our history, don't need to add again
+          add_to_history = false;
+        }
+      }
+
+      if(add_to_history){ //only add new changes to history
+        setHistory(prev => [...prev, ...sorted]);
+        setHistoryBatch(prev => new Set(prev).add(current_batch));
+      }
+      
+      if(!apply_changes) return;
+      const updatedContact = {...contact};
+      
+      for (const change of sorted) {
+        const parsed_value = JSON.parse(change.new_value);
+        switch (change.field_name) {
+          case 'first_name':
+            updatedContact.first_name = parsed_value;
+            break;
+          case 'last_name':
+            updatedContact.last_name = parsed_value;
+            break;
+          case 'email':
+            updatedContact.email = parsed_value;
+            break;
+          case 'phone_number':
+            updatedContact.phone_number = parsed_value;
+            break;
+        }
+      }
+      onUpdate(updatedContact);
+    }
+
+    useEffect(() => {
+        if (lastMessage) {
+          switch (lastMessage.event) {
+            case ContactEventTypes.UPDATED:
+              if(lastMessage.data[0].contact_id === contact.id) {
+                mergeUpdatedContact(lastMessage.data); //only merge changes for this contact
+              }
+              break;
+            default:
+              break;
+          }
+      }
+    }, [lastMessage]);
+
 
     const handleSubmitEdit = async () => {
       setUpdating(true);
@@ -40,7 +130,6 @@ import {History} from './History';
         if (response.ok) {
           const updatedContact = (await response.json()).contact;
           onUpdate(updatedContact);
-          setHistory([]); //clear history to force refetch
           setIsEditing(false);
           setUpdateError('');
         } else {
@@ -75,23 +164,6 @@ import {History} from './History';
         console.error('Error deleting contact:', error);
       } finally {
         setDeleting(false);
-      }
-    };
-
-    const fetchHistory = async () => {
-      if (history.length === 0) {
-        setLoadingHistory(true);
-        try {
-          const response = await fetch(`${apiUrl}/contactsHistory/${contact.id}`);
-          if (response.ok) {
-            const historyData = (await response.json()).history;
-            setHistory(historyData);
-          }
-        } catch (error) {
-          console.error('Error fetching history:', error);
-        } finally {
-          setLoadingHistory(false);
-        }
       }
     };
 

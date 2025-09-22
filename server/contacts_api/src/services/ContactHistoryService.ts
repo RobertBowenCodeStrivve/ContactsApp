@@ -23,13 +23,14 @@ export default class ContactHistoryService {
         if(!this.valid_change_types[type]) {
             throw new Error(`Invalid change type: ${type}`);
         }
-
+        const historyRecords = [];
         const batchId = this.generateBatchId();
         for(const [key, value] of Object.entries(changes)) {
             if(this.check_valid_field(key)) {
-                await this.contactHistoryRepository.addHistory(type, key, JSON.stringify(value), contactId, batchId, trx);
+                historyRecords.push(await this.contactHistoryRepository.addHistory(type, key, JSON.stringify(value), contactId, batchId, trx));
             }
         }
+        return historyRecords
     }
 
     public async getContactHistory(contactId: number) {
