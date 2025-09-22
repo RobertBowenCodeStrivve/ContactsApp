@@ -1,9 +1,14 @@
 import express, { Request, Response } from 'express';
+import cors from 'cors';
 import {DatabaseManager, databaseType, db_options} from '@contacts/database'
 const app = express();
 import ContactsRouter from './api/routes/ContactsRouter';
 import ContactsHistoryRouter from './api/routes/ContactsHistoryRouter';
 
+app.use(cors({
+  origin: [`${process.env.VITE_URL}`], //for vite
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // For form data
 

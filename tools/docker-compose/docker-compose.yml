@@ -12,6 +12,7 @@ services:
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - environment=localstack
+      - VITE_URL=${VITE_URL}
     depends_on:
       contacts-db:
         condition: service_healthy
@@ -45,7 +46,7 @@ services:
     ports:
       - "4173:4173"
     environment: 
-      - CONTACT_API_URL=http://localhost:3000
+      - VITE_CONTACT_API_URL=http://localhost:3000
       - environment=localstack
     depends_on:
       contacts-db:
