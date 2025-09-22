@@ -13,21 +13,20 @@
     const { lastMessage } = useWebSocket(apiUrl);
     
     useEffect(() => {
-      if (lastMessage) {
-        switch (lastMessage.event) {
-          case ContactEventTypes.DELETED:
-            handleContactDelete(lastMessage.data);
-            break;
-          case ContactEventTypes.CREATED:
-            handleContactAdded(lastMessage.data);
-            break;
-          default:
-            break;
-        }
+      if (!lastMessage) {
+        return;
+      }
+      switch (lastMessage.event) {
+        case ContactEventTypes.DELETED:
+          handleContactDelete(lastMessage.data);
+          break;
+        case ContactEventTypes.CREATED:
+          handleContactAdded(lastMessage.data);
+          break;
+        default:
+          break;
       }
     }, [lastMessage]);
-
-
 
     useEffect(() => {
       fetchContacts();
@@ -37,7 +36,7 @@
       try {
         const response = await fetch(`${apiUrl}/contacts`);
         const data = await response.json();
-        const contacts = data.contacts ? data.contacts : []; // Adjust based on API response structure
+        const contacts = data.contacts ? data.contacts : []; 
         setContacts(contacts);
       } catch (error) {
         console.error('Failed to fetch contacts:', error);

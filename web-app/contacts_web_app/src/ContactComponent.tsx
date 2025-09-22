@@ -73,7 +73,7 @@ import {History} from './History';
       
       if(!apply_changes) return;
       const updatedContact = {...contact};
-      
+
       for (const change of sorted) {
         const parsed_value = JSON.parse(change.new_value);
         switch (change.field_name) {
@@ -95,17 +95,18 @@ import {History} from './History';
     }
 
     useEffect(() => {
-        if (lastMessage) {
-          switch (lastMessage.event) {
-            case ContactEventTypes.UPDATED:
-              if(lastMessage.data[0].contact_id === contact.id) {
-                mergeUpdatedContact(lastMessage.data); //only merge changes for this contact
-              }
-              break;
-            default:
-              break;
-          }
-      }
+        if (!lastMessage) {
+          return;
+        }
+        switch (lastMessage.event) {
+          case ContactEventTypes.UPDATED:
+            if(lastMessage.data[0].contact_id === contact.id) {
+              mergeUpdatedContact(lastMessage.data); //only merge changes for this contact
+            }
+            break;
+          default:
+            break;
+        }
     }, [lastMessage]);
 
 
