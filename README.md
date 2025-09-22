@@ -14,12 +14,14 @@
 
   in your .bashrc or .zshrc
 
-  put these
+  set these
 
     export CONTACTS_HOME="<location of the projects root directory on your machine>"
     source $CONTACTS_HOME/tools/contacts-tools-sourceme.sh
 
-make sure to reload your terminal after change the .rc file to have .sh file sourced. 
+make sure to reload your terminal after change the rc file to have .sh file sourced. 
+
+I use zsh as my shell so there may be some issues running on bash as I have not tested. 
 
 ## 2. build the docker stack and run migrations using the command
 
